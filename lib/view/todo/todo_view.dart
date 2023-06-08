@@ -13,6 +13,7 @@ class Todo extends HookConsumerWidget {
 
   List<Widget> _buildTodoList(
       List<TodoItemData> todoItemList, TodoDatabaseNotifier db) {
+    print('todoItemList: $todoItemList');
     List<Widget> list = [];
     for (TodoItemData item in todoItemList) {
       Widget tile = Slidable(
@@ -90,6 +91,8 @@ class Todo extends HookConsumerWidget {
             builder: (context2) {
               return HookConsumer(
                 builder: (context3, ref, _) {
+                  // limitという状態変数を初期化
+                  // useStateフックは、初期値として与えられた値と、その値を更新するための関数を返す
                   final limit = useState<DateTime?>(null);
                   //DatePickerが閉じた際に再ビルドするために使用します。
                   return Padding(
@@ -120,6 +123,7 @@ class Todo extends HookConsumerWidget {
                           },
                         ),
                         Table(
+                          // Table内のセルのデフォルトの配置が上端になる
                           defaultVerticalAlignment:
                           TableCellVerticalAlignment.values[0],
                           children: [
@@ -127,18 +131,29 @@ class Todo extends HookConsumerWidget {
                               children: [
                                 ElevatedButton(
                                   onPressed: () async {
+                                    // 日付選択のダイアログを表示
                                     final date = await showDatePicker(
+                                      // ダイアログを表示するためのcontext
                                       context: context,
+                                      // ダイアログが始めに表示する日付は現在
                                       initialDate: DateTime.now(),
+                                      // ユーザーが選択できる最初の日付（つまり、この日付以前は選択できない）
                                       firstDate: DateTime.now(),
+                                      // ユーザーが選択できる最後の日付
                                       lastDate: DateTime(DateTime.now().year + 5),
                                     );
+                                    // dateがnullでなければ...
                                     if (date != null) {
+                                      // 時刻選択のダイアログを表示
                                       final time = await showTimePicker(
                                         context: context,
+                                        // ダイアログが初期状態で表示する時間は現在
                                         initialTime: TimeOfDay.now(),
                                       );
+                                      // ユーザーが時間を設定した場合に実行
                                       if (time != null) {
+                                        // 選択された日付と時間を使用して新しいDateTimeオブジェクトが作成される
+                                        // そして、limit変数のvalueプロパティに代入される
                                         limit.value = DateTime(
                                           date.year,
                                           date.month,
@@ -146,6 +161,7 @@ class Todo extends HookConsumerWidget {
                                           time.hour,
                                           time.minute,
                                         );
+                                        // temp変数のlimitプロパティが選択された日付と時間に更新される
                                         temp = temp.copyWith(limit: limit.value);
                                       }
                                     }
@@ -153,8 +169,11 @@ class Todo extends HookConsumerWidget {
                                   child: Row(
                                     children: [
                                       Icon(Icons.calendar_today),
+                                      // limit.valueの値がnullかどうかチェック
                                       Text(limit.value == null
+                                      // もし limit.value が null であれば、テキストは空文字列
                                           ? ""
+                                      // もし limit.value が null でなければ、limit.value を文字列に変換し、その先頭から16文字までの部分文字列を取得
                                           : limit.value
                                           .toString()
                                           .substring(0, 16)),
